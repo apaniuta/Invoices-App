@@ -1,9 +1,9 @@
-var express = require('express'),
-    bodyParser = require('body-parser'),
-    http = require('http'),
-    path = require('path'),
-    Sequelize = require('sequelize'),
-    _ = require('lodash');
+let express = require('express'),
+  bodyParser = require('body-parser'),
+  http = require('http'),
+  path = require('path'),
+  Sequelize = require('sequelize'),
+  _ = require('lodash');
 
 
 sequelize = new Sequelize('sqlite://' + path.join(__dirname, 'invoices.sqlite'), {
@@ -78,57 +78,63 @@ InvoiceItem = sequelize.define('invoice_items', {
 
 sequelize.sync().then(function() {
   Customer.create({
-    name: "Mark Benson",
-    address: "353 Rochester St, Rialto FL 43250",
-    phone: "555-534-2342"
+    name: 'Mark Benson',
+    address: '353 Rochester St, Rialto FL 43250',
+    phone: '555-534-2342'
   });
 
   Customer.create({
-    name: "Bob Smith",
-    address: "215 Market St, Dansville CA 94325",
-    phone: "555-534-2342"
+    name: 'Bob Smith',
+    address: '215 Market St, Dansville CA 94325',
+    phone: '555-534-2342'
   });
 
   Customer.create({
-    name: "John Draper",
-    address: "890 Main St, Fontana IL 31450",
-    phone: "555-534-2342"
+    name: 'John Draper',
+    address: '890 Main St, Fontana IL 31450',
+    phone: '555-534-2342'
   });
 
   Product.create({
-    name: "Parachute Pants",
+    name: 'Parachute Pants',
     price: 29.99
   });
 
   Product.create({
-    name: "Phone Holder",
+    name: 'Phone Holder',
     price: 9.99
   });
 
   Product.create({
-    name: "Pet Rock",
+    name: 'Pet Rock',
     price: 5.99
   });
 
   Product.create({
-    name: "Egg Timer",
+    name: 'Egg Timer',
     price: 15.99
   });
 
   Product.create({
-    name: "Neon Green Hat",
+    name: 'Neon Green Hat',
     price: 21.99
   });
 
 }).catch(function(e) {
-  console.log("ERROR SYNCING WITH DB", e);
+  console.log('ERROR SYNCING WITH DB', e);
 });
 
-var app = module.exports = express();
+const app = module.exports = express();
 app.set('port', process.env.PORT || 8000);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS')
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Methods, Access-Control-Allow-Origin");
+  next();
+});
 
 // CUSTOMERS API
 
@@ -136,34 +142,34 @@ app.route('/api/customers')
   .get(function(req, res) {
     Customer.findAll().then(function(customers) {
       res.json(customers);
-    })
+    });
   })
   .post(function(req, res) {
-    var customer = Customer.build(_.pick(req.body, ['name', 'address', 'phone']));
-    customer.save().then(function(customer){
+    const customer = Customer.build(_.pick(req.body, ['name', 'address', 'phone']));
+    customer.save().then(function(customer) {
       res.json(customer);
     });
   });
 
 app.route('/api/customers/:customer_id')
     .get(function(req, res) {
-        Customer.findById(req.params.customer_id).then(function(customer) {
-            res.json(customer);
-        });
+      Customer.findById(req.params.customer_id).then(function(customer) {
+        res.json(customer);
+      });
     })
     .put(function(req, res) {
-        Customer.findById(req.params.customer_id).then(function(customer) {
-            customer.update(_.pick(req.body, ['name', 'address', 'phone'])).then(function(customer) {
-                res.json(customer);
-            });
+      Customer.findById(req.params.customer_id).then(function(customer) {
+        customer.update(_.pick(req.body, ['name', 'address', 'phone'])).then(function(customer) {
+          res.json(customer);
         });
+      });
     })
     .delete(function(req, res) {
-        Customer.findById(req.params.customer_id).then(function(customer) {
-            customer.destroy().then(function(customer) {
-                res.json(customer);
-            });
+      Customer.findById(req.params.customer_id).then(function(customer) {
+        customer.destroy().then(function(customer) {
+          res.json(customer);
         });
+      });
     });
 
 // PRODUCTS API
@@ -172,11 +178,11 @@ app.route('/api/products')
   .get(function(req, res) {
     Product.findAll().then(function(products) {
       res.json(products);
-    })
+    });
   })
   .post(function(req, res) {
-        var product = Product.build(_.pick(req.body, ['name', 'price']));
-    product.save().then(function(product){
+    const product = Product.build(_.pick(req.body, ['name', 'price']));
+    product.save().then(function(product) {
       res.json(product);
     });
   });
@@ -189,7 +195,7 @@ app.route('/api/products/:product_id')
   })
   .put(function(req, res) {
     Product.findById(req.params.product_id).then(function(product) {
-            product.update(_.pick(req.body, ['name', 'price'])).then(function(product) {
+      product.update(_.pick(req.body, ['name', 'price'])).then(function(product) {
         res.json(product);
       });
     });
@@ -207,36 +213,39 @@ app.route('/api/products/:product_id')
 
 app.route('/api/invoices')
     .get(function(req, res) {
-        Invoice.findAll().then(function(invoices) {
-            res.json(invoices);
-        })
+      Invoice.findAll().then(function(invoices) {
+        res.json(invoices);
+      });
     })
     .post(function(req, res) {
-        var invoice = Invoice.build(_.pick(req.body, ['customer_id', 'discount', 'total']));
-        invoice.save().then(function(invoice){
-            res.json(invoice);
-        });
+      const invoice = Invoice.build(_.pick(req.body, ['customer_id', 'discount', 'total']));
+      invoice.save().then(function(invoice) {
+        res.json(invoice);
+      });
     });
 
 app.route('/api/invoices/:invoice_id')
     .get(function(req, res) {
-        Invoice.findById(req.params.invoice_id).then(function(invoice) {
-            res.json(invoice);
-        });
+      Invoice.findById(req.params.invoice_id).then(function(invoice) {
+        res.json(invoice);
+      });
     })
     .put(function(req, res) {
-        Invoice.findById(req.params.invoice_id).then(function(invoice) {
-            invoice.update(_.pick(req.body, ['customer_id', 'discount', 'total'])).then(function(invoice) {
-                res.json(invoice);
-            });
+      //console.log('req', req.params);
+      //console.log('req.body', req.body);
+      Invoice.findById(req.params.invoice_id).then(function(invoice) {
+        console.log('invoice', invoice);
+        invoice.update(_.pick(req.body, ['customer_id', 'discount', 'total'])).then(function(invoice) {
+          res.json(invoice);
         });
+      });
     })
     .delete(function(req, res) {
-        Invoice.findById(req.params.invoice_id).then(function(invoice) {
-            invoice.destroy().then(function(invoice) {
-                res.json(invoice);
-            });
+      Invoice.findById(req.params.invoice_id).then(function(invoice) {
+        invoice.destroy().then(function(invoice) {
+          res.json(invoice);
         });
+      });
     });
 
 
@@ -244,35 +253,35 @@ app.route('/api/invoices/:invoice_id')
 
 app.route('/api/invoices/:invoice_id/items')
     .get(function(req, res) {
-        InvoiceItem.findAll({where: { invoice_id: req.params.invoice_id }}).then(function(invoice_items) {
-            res.json(invoice_items);
-        })
+      InvoiceItem.findAll({where: { invoice_id: req.params.invoice_id }}).then(function(invoice_items) {
+        res.json(invoice_items);
+      });
     })
     .post(function(req, res) {
-        var invoice_item = InvoiceItem.build(_.pick(req.body, ['product_id', 'quantity']));
-        invoice_item.set('invoice_id', req.params.invoice_id);
-        invoice_item.save().then(function(invoice_item){
-            res.json(invoice_item);
-        });
+      const invoice_item = InvoiceItem.build(_.pick(req.body, ['product_id', 'quantity']));
+      invoice_item.set('invoice_id', req.params.invoice_id);
+      invoice_item.save().then(function(invoice_item) {
+        res.json(invoice_item);
+      });
     });
 
 app.route('/api/invoices/:invoice_id/items/:id')
     .get(function(req, res) {
-        InvoiceItem.findById(req.params.id).then(function(invoice_item) {
-            res.json(invoice_item);
-        });
+      InvoiceItem.findById(req.params.id).then(function(invoice_item) {
+        res.json(invoice_item);
+      });
     })
     .put(function(req, res) {
 
-        InvoiceItem.findById(req.params.id).then(function(invoice_item) {
-      invoice_item.update(_.pick(req.body, ['product_id', 'quantity'])).then(function(invoice_item) {
-        res.json(invoice_item);
+      InvoiceItem.findById(req.params.id).then(function(invoice_item) {
+        invoice_item.update(_.pick(req.body, ['product_id', 'quantity'])).then(function(invoice_item) {
+          res.json(invoice_item);
+        });
       });
-    });
-  })
+    })
   .delete(function(req, res) {
-        console.log(req.params);
-        InvoiceItem.findById(req.params.id).then(function(invoice_item) {
+    console.log(req.params);
+    InvoiceItem.findById(req.params.id).then(function(invoice_item) {
       invoice_item.destroy().then(function(invoice_item) {
         res.json(invoice_item);
       });
@@ -286,6 +295,6 @@ app.get('*', function(req, res) {
 });
 
 // Starting express server
-http.createServer(app).listen(app.get('port'), function () {
+http.createServer(app).listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
 });
